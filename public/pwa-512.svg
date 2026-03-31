@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#4F46E5"/>
+  <!-- 십자가 -->
+  <rect x="232" y="50" width="48" height="160" rx="12" fill="white"/>
+  <rect x="168" y="96" width="176" height="48" rx="12" fill="white"/>
+  <!-- 교회 건물 -->
+  <rect x="90" y="268" width="332" height="194" rx="16" fill="white" fill-opacity="0.95"/>
+  <!-- 지붕 삼각형 -->
+  <polygon points="60,278 256,180 452,278" fill="white"/>
+  <!-- 문 -->
+  <rect x="208" y="346" width="96" height="116" rx="48" fill="#4F46E5"/>
+  <!-- 창문 왼쪽 -->
+  <rect x="118" y="298" width="56" height="64" rx="28" fill="#4F46E5" fill-opacity="0.4"/>
+  <!-- 창문 오른쪽 -->
+  <rect x="338" y="298" width="56" height="64" rx="28" fill="#4F46E5" fill-opacity="0.4"/>
+</svg>
