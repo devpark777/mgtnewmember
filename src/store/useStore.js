@@ -2,10 +2,10 @@ import { useState, useCallback } from 'react';
 
 // 4가지 교육 주제
 export const TOPICS = [
-  { id: 1, name: '교회 소개', color: '#4F46E5', icon: '⛪' },
-  { id: 2, name: '구원의 확신', color: '#059669', icon: '✝️' },
-  { id: 3, name: '성경 공부', color: '#D97706', icon: '📖' },
-  { id: 4, name: '신앙 생활', color: '#DC2626', icon: '🙏' },
+  { id: 1, name: '행복한 삶으로의 초대', color: '#4F46E5', icon: '😊' },
+  { id: 2, name: '예수님, 구원과 축복의 근원', color: '#059669', icon: '✝️' },
+  { id: 3, name: '믿음으로 누리는 풍성한 삶', color: '#D97706', icon: '🌿' },
+  { id: 4, name: '자라나는 믿음, 더 풍성한 축복', color: '#DC2626', icon: '🌱' },
 ];
 
 const STORAGE_KEY = 'church_edu_app';
