@@ -77,7 +77,7 @@ function MemberForm({ initial = {}, onSubmit, onClose }) {
       <div style={{ marginBottom: 14 }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#374151' }}>직분</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {['성도', '집사', '권사', '장로', '전도사', '목사', '기타'].map((p) => (
+          {['성도', '청년', '집사', '권사', '장로', '전도사', '목사', '기타'].map((p) => (
             <button key={p} type="button" onClick={() => set('position', p)}
               style={{
                 padding: '7px 14px', border: '1px solid', borderRadius: 20, cursor: 'pointer', fontSize: 13,

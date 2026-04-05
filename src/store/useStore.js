@@ -110,8 +110,9 @@ export function useStore() {
   };
 
   // ── 일정 ──────────────────────────────────────────────
-  // selectedMemberIds: 관리자가 이번 주 참석 확인한 교육생 ID 목록 (없으면 eligible 전체)
-  const autoSchedule = (weekLabel, weekStart, selectedMemberIds) => {
+  // selectedMemberIds: 관리자가 이번 주 참석 확인한 교육생 ID 목록
+  // selectedTopicIds: 이번 주 교육할 과목 ID 목록 (순서 무관)
+  const autoSchedule = (weekLabel, weekStart, selectedMemberIds, selectedTopicIds) => {
     update((d) => {
       const teachers = d.teachers;
       if (teachers.length === 0) return d;
@@ -141,12 +142,25 @@ export function useStore() {
       const toSchedule = attendingMembers.filter((m) => !alreadyScheduledIds.has(m.id));
       if (toSchedule.length === 0) return d;
 
-      // Step 1: 각 교육생의 다음 과목 결정 (미이수 중 가장 낮은 번호)
+      // Step 1: 각 교육생의 과목 결정
+      // selectedTopicIds가 있으면 → 이번 주 교육 과목 중 미이수 과목 우선 배정 (순서 무관)
+      // selectedTopicIds가 없으면 → 미이수 중 가장 낮은 번호 (기존 방식)
+      const availableTopicIds = selectedTopicIds && selectedTopicIds.length > 0
+        ? new Set(selectedTopicIds)
+        : null;
+
       const memberTopicPairs = [];
       toSchedule.forEach((member) => {
         const remaining = TOPICS.filter((t) => !member.completedTopics.includes(t.id));
         if (remaining.length === 0) return;
-        memberTopicPairs.push({ memberId: member.id, topicId: remaining[0].id });
+
+        // 이번 주 가르칠 과목 중 미이수 과목 찾기
+        const matchedTopic = availableTopicIds
+          ? remaining.find((t) => availableTopicIds.has(t.id))
+          : remaining[0];
+
+        if (!matchedTopic) return; // 이번 주 가르칠 과목 중 필요한 과목 없음
+        memberTopicPairs.push({ memberId: member.id, topicId: matchedTopic.id });
       });
 
       if (memberTopicPairs.length === 0) return d;

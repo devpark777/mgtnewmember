@@ -10,7 +10,8 @@ function CreateScheduleModal({ members, teachers, onConfirm, onClose }) {
   const [weekStart, setWeekStart] = useState(sunday.toISOString().split('T')[0]);
   const [weekLabel, setWeekLabel] = useState(getWeekLabel(sunday));
   const [checkedIds, setCheckedIds] = useState(new Set());
-  const [step, setStep] = useState(1); // 1: 날짜선택, 2: 참석확인
+  const [selectedTopicIds, setSelectedTopicIds] = useState(new Set([1, 2, 3, 4]));
+  const [step, setStep] = useState(1); // 1: 날짜선택, 2: 참석확인, 3: 과목선택
 
   const handleWeekChange = (v) => {
     setWeekStart(v);
@@ -134,9 +135,76 @@ function CreateScheduleModal({ members, teachers, onConfirm, onClose }) {
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => setStep(1)} style={{ flex: 1, padding: '12px', border: '1px solid #D1D5DB', borderRadius: 12, background: '#fff', cursor: 'pointer', fontSize: 14 }}>← 이전</button>
-        <button onClick={() => onConfirm(weekLabel, weekStart, [...checkedIds])} disabled={!canGenerate}
+        <button onClick={() => setStep(3)} disabled={!canGenerate}
           style={{ flex: 2, padding: '12px', border: 'none', borderRadius: 12, background: canGenerate ? '#4F46E5' : '#D1D5DB', color: '#fff', cursor: canGenerate ? 'pointer' : 'not-allowed', fontSize: 14, fontWeight: 700 }}>
-          {checkedIds.size}명 자동 배치 생성
+          다음: 교육 과목 선택 →
+        </button>
+      </div>
+    </div>
+  );
+
+  // step 3: 이번 주 교육 과목 선택
+  const toggleTopic = (id) => {
+    setSelectedTopicIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  // 참석예정자 중 각 과목이 필요한 인원 수
+  const topicNeedCount = {};
+  TOPICS.forEach((t) => {
+    const attendingMembersList = eligibleMembers.filter((m) => checkedIds.has(m.id));
+    topicNeedCount[t.id] = attendingMembersList.filter((m) => !m.completedTopics.includes(t.id)).length;
+  });
+
+  const canFinish = selectedTopicIds.size > 0;
+
+  return (
+    <div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>📚 이번 주 교육할 과목 선택</div>
+        <div style={{ fontSize: 12, color: '#6B7280' }}>{weekLabel} · {checkedIds.size}명 참석예정</div>
+      </div>
+
+      <div style={{ border: '1px solid #E5E7EB', borderRadius: 10, overflow: 'hidden', marginBottom: 14 }}>
+        {TOPICS.map((t, i) => {
+          const checked = selectedTopicIds.has(t.id);
+          const needCount = topicNeedCount[t.id] || 0;
+          return (
+            <div key={t.id} onClick={() => toggleTopic(t.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
+                borderBottom: i < TOPICS.length - 1 ? '1px solid #F3F4F6' : 'none',
+                background: checked ? t.color + '10' : '#fff', cursor: 'pointer',
+              }}>
+              <div style={{
+                width: 22, height: 22, borderRadius: 6, border: `2px solid ${checked ? t.color : '#D1D5DB'}`,
+                background: checked ? t.color : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                {checked && <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>✓</span>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: checked ? t.color : '#374151' }}>{t.icon} {t.id}과 · {t.name}</span>
+              </div>
+              <span style={{ fontSize: 12, color: needCount > 0 ? '#065F46' : '#9CA3AF', background: needCount > 0 ? '#F0FDF4' : '#F9FAFB', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>
+                {needCount}명 필요
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{ background: '#FFFBEB', borderRadius: 10, padding: '10px 12px', marginBottom: 14, fontSize: 12, color: '#92400E' }}>
+        💡 선택한 과목 중 필요한 교육생만 자동 배정됩니다. 과목 순서는 무관합니다.
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={() => setStep(2)} style={{ flex: 1, padding: '12px', border: '1px solid #D1D5DB', borderRadius: 12, background: '#fff', cursor: 'pointer', fontSize: 14 }}>← 이전</button>
+        <button onClick={() => onConfirm(weekLabel, weekStart, [...checkedIds], [...selectedTopicIds])} disabled={!canFinish}
+          style={{ flex: 2, padding: '12px', border: 'none', borderRadius: 12, background: canFinish ? '#4F46E5' : '#D1D5DB', color: '#fff', cursor: canFinish ? 'pointer' : 'not-allowed', fontSize: 14, fontWeight: 700 }}>
+          배치 생성
         </button>
       </div>
     </div>
@@ -465,8 +533,8 @@ function SchedulePanel({ schedules, members, teachers, autoSchedule, markAssignm
 
   const sorted = [...schedules].sort((a, b) => new Date(b.weekStart) - new Date(a.weekStart));
 
-  const handleCreate = (weekLabel, weekStart, selectedIds) => {
-    autoSchedule(weekLabel, weekStart, selectedIds);
+  const handleCreate = (weekLabel, weekStart, selectedIds, selectedTopicIds) => {
+    autoSchedule(weekLabel, weekStart, selectedIds, selectedTopicIds);
     setShowCreate(false);
   };
 
